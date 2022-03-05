@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.io.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.json"};
+  </script>
+
+  <meta name="description" content="WindowsHookInjection0x1 介绍钩子(Hook)，是Windows消息处理机制的一个平台，应用程序可以在上面设置子程以监视指定窗口的某种消息，而且所监视的窗口可以是其他进程所创建的。当消息到达后，在目标窗口处理函数之前处理该消息。 因此，钩子机制允许应用程序截获处理window消息或特定事件。 底层上看，钩子实际上是一个处理消息的程序段，通过系统调用，把它挂入系统。每当特定的消">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Windows进程注入方法-Windows钩子注入">
+<meta property="og:url" content="http://github.io.com/WindowsHookInjection/index.html">
+<meta property="og:site_name" content="Shaw&#39;s Blog">
+<meta property="og:description" content="WindowsHookInjection0x1 介绍钩子(Hook)，是Windows消息处理机制的一个平台，应用程序可以在上面设置子程以监视指定窗口的某种消息，而且所监视的窗口可以是其他进程所创建的。当消息到达后，在目标窗口处理函数之前处理该消息。 因此，钩子机制允许应用程序截获处理window消息或特定事件。 底层上看，钩子实际上是一个处理消息的程序段，通过系统调用，把它挂入系统。每当特定的消">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-03-05T03:16:19.000Z">
+<meta property="article:modified_time" content="2022-03-05T03:21:12.245Z">
+<meta property="article:author" content="Shaw">
+<meta property="article:tag" content="windows">
+<meta property="article:tag" content="readteam">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://github.io.com/WindowsHookInjection/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Windows进程注入方法-Windows钩子注入 | Shaw's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Shaw's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://github.io.com/WindowsHookInjection/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar_1.jpg">
+      <meta itemprop="name" content="Shaw">
+      <meta itemprop="description" content="Never give up">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Shaw's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Windows进程注入方法-Windows钩子注入
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2022-03-05 11:16:19 / Modified: 11:21:12" itemprop="dateCreated datePublished" datetime="2022-03-05T11:16:19+08:00">2022-03-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Security/" itemprop="url" rel="index"><span itemprop="name">Security</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="WindowsHookInjection"><a href="#WindowsHookInjection" class="headerlink" title="WindowsHookInjection"></a>WindowsHookInjection</h1><h1 id="0x1-介绍"><a href="#0x1-介绍" class="headerlink" title="0x1 介绍"></a>0x1 介绍</h1><p>钩子(Hook)，是Windows消息处理机制的一个平台，应用程序可以在上面设置子程以监视指定窗口的某种消息，而且所监视的窗口可以是其他进程所创建的。当消息到达后，在目标窗口处理函数之前处理该消息。</p>
+<p>因此，钩子机制允许应用程序截获处理window消息或特定事件。</p>
+<p>底层上看，钩子实际上是一个处理消息的程序段，通过系统调用，把它挂入系统。每当特定的消息发出，在没有到达目的窗口前，钩子程序就先捕获该消息，亦即钩子函数先得到控制权。这时钩子函数即可以加工处理（改变）该消息，也可以不作处理而继续传递该消息，还可以强制结束消息的传递。</p>
+<span id="more"></span>
+
+<h1 id="0x2-原理"><a href="#0x2-原理" class="headerlink" title="0x2 原理"></a>0x2 原理</h1><p>核心是使用挂钩API：<code>SetWindowsHookEx</code>， 在微软的msdn上有详细介绍：</p>
+<blockquote>
+<h3 id="SetWindowsHookEx"><a href="#SetWindowsHookEx" class="headerlink" title="SetWindowsHookEx"></a>SetWindowsHookEx</h3><p>The <strong>SetWindowsHookEx</strong> function installs an application-defined hook  procedure into a hook chain. You would install a hook procedure to monitor the  system for certain types of events. These events are associated either with a  specific thread or with all threads in the same desktop as the calling thread. </p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&gt;<span class="function">HHOOK <span class="title">SetWindowsHookEx</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">&gt;<span class="keyword">int</span> idHook,        <span class="comment">// hook type</span></span></span></span><br><span class="line"><span class="params"><span class="function">&gt;HOOKPROC lpfn,     <span class="comment">// hook procedure</span></span></span></span><br><span class="line"><span class="params"><span class="function">&gt;HINSTANCE hMod,    <span class="comment">// handle to application instance</span></span></span></span><br><span class="line"><span class="params"><span class="function">&gt;DWORD dwThreadId   <span class="comment">// thread identifier);</span></span></span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Parameters"><a href="#Parameters" class="headerlink" title="Parameters"></a>Parameters</h4><ul>
+<li><em>idHook</em> </li>
+</ul>
+<p>[in] Specifies the type of hook procedure to be installed. This parameter  can be one of the following values. </p>
+<ul>
+<li><em>lpfn</em> </li>
+</ul>
+<p>[in] Pointer to the hook procedure. If the <em>dwThreadId</em> parameter is  zero or specifies the identifier of a thread created by a different process, the  <em>lpfn</em> parameter must point to a hook procedure in a dynamic-link library  (DLL). Otherwise, <em>lpfn</em> can point to a hook procedure in the code  associated with the current process. </p>
+<ul>
+<li><em>hMod</em> </li>
+</ul>
+<p>[in] Handle to the DLL containing the hook procedure pointed to by the  <em>lpfn</em> parameter. The <em>hMod</em> parameter must be set to NULL if the  <em>dwThreadId</em> parameter specifies a thread created by the current process  and if the hook procedure is within the code associated with the current  process. </p>
+<ul>
+<li><em>dwThreadId</em> </li>
+</ul>
+<p>[in] Specifies the identifier of the thread with which the hook procedure is  to be associated. If this parameter is zero, the hook procedure is associated  with all existing threads running in the same desktop as the calling thread. </p>
+</blockquote>
+<p>钩子分为局部钩子和全局钩子：</p>
+<ul>
+<li>局部钩子：hMod设为NULL，dwThreadId=本线程Id</li>
+<li>全局钩子：hMod为回调函数所在模块句柄</li>
+</ul>
+<p>如果需要对某进程注入，需要使用全局钩子，需要创建一个dll，hMod为dll的模块句柄，Hook的回调函数放在dll中，线程Id为指定进程的主线程Id，线程Id为0时则会钩系统范围内所有进程的窗口进程</p>
+<h1 id="0x3-代码"><a href="#0x3-代码" class="headerlink" title="0x3 代码"></a>0x3 代码</h1><p>exe部分：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">LRESULT</span> <span class="params">(CALLBACK *pHookFun)</span><span class="params">(<span class="keyword">int</span>, WPARAM, LPARAM)</span></span>;</span><br><span class="line"></span><br><span class="line">pHookFun HookKeyboardProc = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	HMODULE hMod = <span class="literal">NULL</span>;</span><br><span class="line">	hMod = ::<span class="built_in">LoadLibrary</span>(<span class="string">&quot;HookDll.dll&quot;</span>);</span><br><span class="line">	<span class="keyword">if</span> (!hMod) &#123;</span><br><span class="line">		<span class="built_in">OutputDebugString</span>(<span class="string">&quot;[-] LoadLibrary(\&quot;HookDll.dll\&quot;) faild&quot;</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	::<span class="built_in">OutputDebugString</span>(<span class="string">&quot;[+] LoadLibrary(\&quot;HookDll.dll\&quot;) success&quot;</span>);</span><br><span class="line"></span><br><span class="line">	HHOOK* g_pHook = <span class="literal">NULL</span>;</span><br><span class="line">	g_pHook = (HHOOK*)::<span class="built_in">GetProcAddress</span>(hMod, <span class="string">&quot;g_hook&quot;</span>);</span><br><span class="line">	<span class="keyword">if</span> (!g_pHook) &#123;</span><br><span class="line">		<span class="built_in">OutputDebugString</span>(<span class="string">&quot;[-] GetProcAddress(hMod, \&quot;g_hook\&quot;) faild&quot;</span>);</span><br><span class="line">		<span class="built_in">FreeLibrary</span>(hMod);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	::<span class="built_in">OutputDebugString</span>(<span class="string">&quot;[+] GetProcAddress(hMod, \&quot;g_hook\&quot;) success&quot;</span>);</span><br><span class="line"></span><br><span class="line">	HookKeyboardProc = (pHookFun)::<span class="built_in">GetProcAddress</span>(hMod, <span class="string">&quot;HookKeyboardProc&quot;</span>);</span><br><span class="line">	<span class="keyword">if</span> (!HookKeyboardProc) &#123;</span><br><span class="line">		<span class="built_in">OutputDebugString</span>(<span class="string">&quot;[-] GetProcAddress(hMod, \&quot;HookKeyboardProc\&quot;) faild&quot;</span>);</span><br><span class="line">		<span class="built_in">FreeLibrary</span>(hMod);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	::<span class="built_in">OutputDebugString</span>(<span class="string">&quot;[+] GetProcAddress(hMod, \&quot;HookKeyboardProc\&quot;) success&quot;</span>);</span><br><span class="line"></span><br><span class="line">	*g_pHook = ::<span class="built_in">SetWindowsHookEx</span>(</span><br><span class="line">		WH_KEYBOARD,</span><br><span class="line">		HookKeyboardProc,</span><br><span class="line">		hMod,</span><br><span class="line">		<span class="number">0</span></span><br><span class="line">	);</span><br><span class="line">	<span class="keyword">if</span> (!*g_pHook) </span><br><span class="line">	&#123;</span><br><span class="line">		::<span class="built_in">OutputDebugString</span>(<span class="string">&quot;[+] SetWindowsHookEx faild&quot;</span>);</span><br><span class="line">		<span class="built_in">FreeLibrary</span>(hMod);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	::<span class="built_in">OutputDebugString</span>(<span class="string">&quot;[+] SetWindowsHookEx success&quot;</span>);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;[+] Start hook keyboard message, wait for exit\r\n&quot;</span>);</span><br><span class="line">	<span class="built_in">system</span>(<span class="string">&quot;pause&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">UnhookWindowsHookEx</span>(*g_pHook);</span><br><span class="line">	::<span class="built_in">OutputDebugString</span>(<span class="string">&quot;[+] UnhookWindowsHookEx&quot;</span>);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;[+] End hook keyboard message, exit\r\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>HookDll:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">HOOKDLL_API HHOOK g_hook = <span class="literal">NULL</span>;</span><br><span class="line"><span class="function">HOOKDLL_API LRESULT CALLBACK <span class="title">HookKeyboardProc</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">int</span> code,       <span class="comment">// hook code</span></span></span></span><br><span class="line"><span class="params"><span class="function">    WPARAM wParam,  <span class="comment">// virtual-key code</span></span></span></span><br><span class="line"><span class="params"><span class="function">    LPARAM lParam   <span class="comment">// keystroke-message information</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (code &lt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">CallNextHookEx</span>(</span><br><span class="line">            g_hook,</span><br><span class="line">            code,</span><br><span class="line">            wParam,</span><br><span class="line">            lParam);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">char</span> szBuff[MAXBYTE] = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">    <span class="built_in">wsprintf</span>(szBuff, <span class="string">&quot;Hook：%c &quot;</span>, wParam);</span><br><span class="line">    <span class="built_in">OutputDebugString</span>(szBuff);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">CallNextHookEx</span>(</span><br><span class="line">        g_hook,</span><br><span class="line">        code,</span><br><span class="line">        wParam,</span><br><span class="line">        lParam);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="0x4-优缺点"><a href="#0x4-优缺点" class="headerlink" title="0x4 优缺点"></a>0x4 优缺点</h1><h2 id="1-优点"><a href="#1-优点" class="headerlink" title="1. 优点"></a>1. 优点</h2><ul>
+<li>和利用注册表来注入DLL的方法相比，这种方法允许我们在不需要该DLL的时候从进程的地址空间中撤销对它的映射，只需要调用UnhookWindowsHookEx就可以达到目的。当一个线程调用UnhookWindowsHookEx的时候，系统会遍历自己内部的一个已经注入过该DLL的进程列表，并将该DLL的锁计数器递减。当锁计数器减到0的时候，系统会自动从进程的地址空间中撤销对该DLL的映射</li>
+<li>这种方式可以理解为借用了windows自己原生的机制来进行DLL注入，注入过程比较稳定</li>
+<li>当系统把<strong>挂钩过滤函数（hook filter function）</strong>所对应的DLL注入或映射到地址空间中时，会映射整个DLL，而不仅仅只是挂钩过滤函数，这意味着该DLL内的所有函数存在于被注入的进程中，能够被被注入进程中的任何线程调用。</li>
+</ul>
+<h2 id="2-缺点"><a href="#2-缺点" class="headerlink" title="2. 缺点"></a>2. 缺点</h2><ul>
+<li>系统为了防止内存访问违规，在被注入进程指定Hook函数的时候，会对注入DLL的锁计数器加1，因为如果不这么做，则被注入进程在执行Hook函数的时候，系统的另一个进程可能会调用UnhookWindowsHookEx，从而引起内存访问违规。这导致我们不能在调用了Hook函数，且函数还在运行时把挂钩清除，在Hook函数执行的整个生命周期，这个挂钩必须一直有效。</li>
+</ul>
+<h1 id="0x5-参考链接"><a href="#0x5-参考链接" class="headerlink" title="0x5 参考链接"></a>0x5 参考链接</h1><blockquote>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/LittleHann/p/6336950.html">https://www.cnblogs.com/LittleHann/p/6336950.html</a></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>Shaw
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="http://github.io.com/WindowsHookInjection/" title="Windows进程注入方法-Windows钩子注入">http://github.io.com/WindowsHookInjection/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/windows/" rel="tag"><i class="fa fa-tag"></i> windows</a>
+              <a href="/tags/readteam/" rel="tag"><i class="fa fa-tag"></i> readteam</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/RegistryInjection/" rel="prev" title="Windows进程注入方法-注册表注入">
+      <i class="fa fa-chevron-left"></i> Windows进程注入方法-注册表注入
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#WindowsHookInjection"><span class="nav-number">1.</span> <span class="nav-text">WindowsHookInjection</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x1-%E4%BB%8B%E7%BB%8D"><span class="nav-number">2.</span> <span class="nav-text">0x1 介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x2-%E5%8E%9F%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">0x2 原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SetWindowsHookEx"><span class="nav-number">3.0.1.</span> <span class="nav-text">SetWindowsHookEx</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Parameters"><span class="nav-number">3.0.1.1.</span> <span class="nav-text">Parameters</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x3-%E4%BB%A3%E7%A0%81"><span class="nav-number">4.</span> <span class="nav-text">0x3 代码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x4-%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">5.</span> <span class="nav-text">0x4 优缺点</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E4%BC%98%E7%82%B9"><span class="nav-number">5.1.</span> <span class="nav-text">1. 优点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E7%BC%BA%E7%82%B9"><span class="nav-number">5.2.</span> <span class="nav-text">2. 缺点</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x5-%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="nav-number">6.</span> <span class="nav-text">0x5 参考链接</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Shaw"
+      src="/images/avatar_1.jpg">
+  <p class="site-author-name" itemprop="name">Shaw</p>
+  <div class="site-description" itemprop="description">Never give up</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/kznyx" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;kznyx" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kznyx2@outlook.com" title="E-Mail → mailto:kznyx2@outlook.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Shaw</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
