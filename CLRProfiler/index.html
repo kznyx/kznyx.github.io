@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.io.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.json"};
+  </script>
+
+  <meta name="description" content="0x01 介绍根据微软MSDN文档的描述，公共语言运行时探查器(CLR Profiler) 是一个动态链接库 (DLL)，具有使用分析 API 从 CLR 中接收消息以及向 CLR 发送消息的功能。 CLR 在运行时加载探查器 DLL。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CLRProfiler">
+<meta property="og:url" content="http://github.io.com/CLRProfiler/index.html">
+<meta property="og:site_name" content="Blog">
+<meta property="og:description" content="0x01 介绍根据微软MSDN文档的描述，公共语言运行时探查器(CLR Profiler) 是一个动态链接库 (DLL)，具有使用分析 API 从 CLR 中接收消息以及向 CLR 发送消息的功能。 CLR 在运行时加载探查器 DLL。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://github.io.com/CLRProfiler/ATL.png">
+<meta property="og:image" content="http://github.io.com/CLRProfiler/ATLSetting.png">
+<meta property="og:image" content="http://github.io.com/CLRProfiler/ATLTwoProject.png">
+<meta property="og:image" content="http://github.io.com/CLRProfiler/RegisterOutput.png">
+<meta property="og:image" content="http://github.io.com/CLRProfiler/AdditonalDependencies.png">
+<meta property="og:image" content="http://github.io.com/CLRProfiler/Test.png">
+<meta property="og:image" content="http://github.io.com/CLRProfiler/processhacker.png">
+<meta property="og:image" content="http://github.io.com/CLRProfiler/Test2.png">
+<meta property="og:image" content="http://github.io.com/CLRProfiler/EventViewer.png">
+<meta property="article:published_time" content="2022-04-05T15:13:46.000Z">
+<meta property="article:modified_time" content="2022-04-05T15:18:08.378Z">
+<meta property="article:author" content="kznyx">
+<meta property="article:tag" content="windows">
+<meta property="article:tag" content="C++">
+<meta property="article:tag" content="C#">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://github.io.com/CLRProfiler/ATL.png">
+
+<link rel="canonical" href="http://github.io.com/CLRProfiler/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>CLRProfiler | Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://github.io.com/CLRProfiler/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar_1.jpg">
+      <meta itemprop="name" content="kznyx">
+      <meta itemprop="description" content="Never give up">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CLRProfiler
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2022-04-05 23:13:46 / Modified: 23:18:08" itemprop="dateCreated datePublished" datetime="2022-04-05T23:13:46+08:00">2022-04-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/deveplopment/" itemprop="url" rel="index"><span itemprop="name">deveplopment</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="0x01-介绍"><a href="#0x01-介绍" class="headerlink" title="0x01 介绍"></a>0x01 介绍</h1><p>根据微软<a target="_blank" rel="noopener" href="https://docs.microsoft.com/zh-cn/dotnet/framework/unmanaged-api/profiling/profiling-overview">MSDN文档的描述</a>，公共语言运行时探查器(CLR Profiler) 是一个动态链接库 (DLL)，具有使用分析 API 从 CLR 中接收消息以及向 CLR 发送消息的功能。 CLR 在运行时加载探查器 DLL。</p>
+<span id="more"></span>
+
+<p>简单来说就是.Net程序执行时发生以下操作和事件的相关信息时，就会通知调用CLR Profiler相对应的回调函数：</p>
+<ul>
+<li>CLR 启动和关闭事件。</li>
+<li>应用程序域创建和关闭事件。</li>
+<li>程序集加载和卸载事件。</li>
+<li>模块加载和卸载事件。</li>
+<li>COM vtable 创建和析构事件。</li>
+<li>实时 (jIT) 编译和代码间距调整事件。</li>
+<li>类加载和卸载事件。</li>
+<li>线程创建和析构事件。</li>
+<li>函数入口和退出事件。</li>
+<li>异常。</li>
+<li>托管和非托管代码执行之间的转换。</li>
+<li>不同运行时上下文之间的转换。</li>
+<li>有关运行时挂起的信息。</li>
+<li>有关运行时内存堆和垃圾回收活动的信息</li>
+</ul>
+<p>开发CLR Profiler需要使用到C++和Com组件。</p>
+<h1 id="0x02-ATL项目"><a href="#0x02-ATL项目" class="headerlink" title="0x02 ATL项目"></a>0x02 ATL项目</h1><p>ATL是ActiveX Template Library 的缩写，它是一套C++模板库。使用ATL能够快速地开发出高效、简洁的代码（Effective and Slim code），同时对COM组件的开发提供最大限度的代码自动生成以及可视化支持。</p>
+<p>这里使用VS2019来创建项目</p>
+<h2 id="创建项目"><a href="#创建项目" class="headerlink" title="创建项目"></a>创建项目</h2><p>选择ATL-Project</p>
+<p><img src="ATL.png"></p>
+<p>配置就使用默认，然后点击OK</p>
+<p><img src="ATLSetting.png"></p>
+<p>Visual Studio帮我们创建了两个项目，后缀PS暂时不用管，只关注第一个项目</p>
+<p><img src="ATLTwoProject.png"></p>
+<p>在<code>Properties/Linker/General/Register Output -&gt; No</code>将项目的自动注册功能关闭，不需要把dll注册到注册表中</p>
+<p><img src="RegisterOutput.png"></p>
+<p>在<code>Properties/Linker/Input/Additonal Dependencies</code>添加依赖库<code>corguids.lib</code></p>
+<p><img src="AdditonalDependencies.png"></p>
+<h2 id="添加代码"><a href="#添加代码" class="headerlink" title="添加代码"></a>添加代码</h2><ul>
+<li><strong>framework.h:</strong> 在文件尾添加<code>using namespace ATL;</code></li>
+<li><strong>Resource.h:</strong> 添加<code>#define IDR_PROFILER    102</code></li>
+<li><strong>CLRProfiler.cpp:</strong> 删除函数<code>STDAPI DllInstall(BOOL bInstall, _In_opt_  LPCWSTR pszCmdLine)</code></li>
+<li><strong>CLRProfiler.def:</strong> 将<code>LIBRARY</code>替换成<code>LIBRARY &quot;CLRProfiler.dll&quot;</code>，删除<code>DllInstall PRIVATE</code></li>
+<li><strong>CLRProfiler.idl:</strong> 替换idl文件代码：</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">import &quot;oaidl.idl&quot;;</span><br><span class="line">import &quot;ocidl.idl&quot;;</span><br><span class="line"></span><br><span class="line">[</span><br><span class="line">    object,</span><br><span class="line">    uuid(22ADD80B-C4E6-42FE-BC33-1921A2B5F662),</span><br><span class="line">    helpstring(&quot;ICLRProfiler Interface&quot;),</span><br><span class="line">    pointer_default(unique)</span><br><span class="line">]</span><br><span class="line">interface ICLRProfiler : IUnknown &#123;</span><br><span class="line">&#125;;</span><br><span class="line">[</span><br><span class="line">    uuid(48C2393F-5542-4DC6-BEE9-49CDF10F91DA),</span><br><span class="line">    version(1.0),</span><br><span class="line">    helpstring(&quot;Profiler 1.0 Type Library&quot;)</span><br><span class="line">]</span><br><span class="line">library CLRProfilerLib</span><br><span class="line">&#123;</span><br><span class="line">    importlib(&quot;stdole2.tlb&quot;);</span><br><span class="line">    [</span><br><span class="line">        uuid(F62D32FD-6D99-4C9F-B891-A5FCEB01B1CD),</span><br><span class="line">        helpstring(&quot;CLRProfiler Class&quot;)</span><br><span class="line">    ]</span><br><span class="line">    coclass CLRProfiler</span><br><span class="line">    &#123;</span><br><span class="line">        [default] interface IUnknown;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>ProfilerCallback.h:</strong> 创建探测器回调函数的头文件：</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">pragma</span> once</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;cor.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;corprof.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;framework.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;CLRProfiler_i.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ATL_NO_VTABLE</span> <span class="title">ProfilerCallback</span> :</span></span><br><span class="line">    <span class="keyword">public</span> CComObjectRootEx&lt;CComSingleThreadModel&gt;,</span><br><span class="line">    <span class="keyword">public</span> CComCoClass&lt;ProfilerCallback, &amp;CLSID_CLRProfiler&gt;,</span><br><span class="line">    <span class="keyword">public</span> ICorProfilerCallback2</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">ProfilerCallback</span>();</span><br><span class="line"></span><br><span class="line">    <span class="built_in">DECLARE_REGISTRY_RESOURCEID</span>(IDR_PROFILER)</span><br><span class="line">    <span class="built_in">BEGIN_COM_MAP</span>(ProfilerCallback)</span><br><span class="line">        <span class="built_in">COM_INTERFACE_ENTRY</span>(ICorProfilerCallback)</span><br><span class="line">        <span class="built_in">COM_INTERFACE_ENTRY</span>(ICorProfilerCallback2)</span><br><span class="line">    <span class="built_in">END_COM_MAP</span>()</span><br><span class="line">    <span class="built_in">DECLARE_PROTECT_FINAL_CONSTRUCT</span>()</span><br><span class="line"></span><br><span class="line">    <span class="function">HRESULT <span class="title">FinalConstruct</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">FinalRelease</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ICorProfilerCallback interface implementation</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">Initialize</span><span class="params">(IUnknown* pICorProfilerInfoUnk)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">Shutdown</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">AppDomainCreationStarted</span><span class="params">(AppDomainID appDomainID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">AppDomainCreationFinished</span><span class="params">(AppDomainID appDomainID, HRESULT hrStatus)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">AppDomainShutdownStarted</span><span class="params">(AppDomainID appDomainID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">AppDomainShutdownFinished</span><span class="params">(AppDomainID appDomainID, HRESULT hrStatus)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">AssemblyLoadStarted</span><span class="params">(AssemblyID assemblyID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">AssemblyLoadFinished</span><span class="params">(AssemblyID assemblyID, HRESULT hrStatus)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">AssemblyUnloadStarted</span><span class="params">(AssemblyID assemblyID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">AssemblyUnloadFinished</span><span class="params">(AssemblyID assemblyID, HRESULT hrStatus)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ModuleLoadStarted</span><span class="params">(ModuleID moduleID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ModuleLoadFinished</span><span class="params">(ModuleID moduleID, HRESULT hrStatus)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ModuleUnloadStarted</span><span class="params">(ModuleID moduleID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ModuleUnloadFinished</span><span class="params">(ModuleID moduleID, HRESULT hrStatus)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ModuleAttachedToAssembly</span><span class="params">(ModuleID moduleID, AssemblyID assemblyID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ClassLoadStarted</span><span class="params">(ClassID classID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ClassLoadFinished</span><span class="params">(ClassID classID, HRESULT hrStatus)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ClassUnloadStarted</span><span class="params">(ClassID classID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ClassUnloadFinished</span><span class="params">(ClassID classID, HRESULT hrStatus)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">FunctionUnloadStarted</span><span class="params">(FunctionID functionID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">JITCompilationStarted</span><span class="params">(FunctionID functionID, BOOL fIsSafeToBlock)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">JITCompilationFinished</span><span class="params">(FunctionID functionID, HRESULT hrStatus, BOOL fIsSafeToBlock)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">JITCachedFunctionSearchStarted</span><span class="params">(FunctionID functionID, BOOL* pbUseCachedFunction)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">JITCachedFunctionSearchFinished</span><span class="params">(FunctionID functionID, COR_PRF_JIT_CACHE result)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">JITFunctionPitched</span><span class="params">(FunctionID functionID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">JITInlining</span><span class="params">(FunctionID callerID, FunctionID calleeID, BOOL* pfShouldInline)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ThreadCreated</span><span class="params">(ThreadID threadID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ThreadDestroyed</span><span class="params">(ThreadID threadID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ThreadAssignedToOSThread</span><span class="params">(ThreadID managedThreadID, DWORD osThreadID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">RemotingClientInvocationStarted</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">RemotingClientSendingMessage</span><span class="params">(GUID* pCookie, BOOL fIsAsync)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">RemotingClientReceivingReply</span><span class="params">(GUID* pCookie, BOOL fIsAsync)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">RemotingClientInvocationFinished</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">RemotingServerReceivingMessage</span><span class="params">(GUID* pCookie, BOOL fIsAsync)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">RemotingServerInvocationStarted</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">RemotingServerInvocationReturned</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">RemotingServerSendingReply</span><span class="params">(GUID* pCookie, BOOL fIsAsync)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">UnmanagedToManagedTransition</span><span class="params">(FunctionID functionID, COR_PRF_TRANSITION_REASON reason)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ManagedToUnmanagedTransition</span><span class="params">(FunctionID functionID, COR_PRF_TRANSITION_REASON reason)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">RuntimeSuspendStarted</span><span class="params">(COR_PRF_SUSPEND_REASON suspendReason)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">RuntimeSuspendFinished</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">RuntimeSuspendAborted</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">RuntimeResumeStarted</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">RuntimeResumeFinished</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">RuntimeThreadSuspended</span><span class="params">(ThreadID threadid)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">RuntimeThreadResumed</span><span class="params">(ThreadID threadid)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">MovedReferences</span><span class="params">(ULONG cmovedObjectIDRanges, ObjectID oldObjectIDRangeStart[], ObjectID newObjectIDRangeStart[], ULONG cObjectIDRangeLength[])</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ObjectAllocated</span><span class="params">(ObjectID objectID, ClassID classID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ObjectsAllocatedByClass</span><span class="params">(ULONG classCount, ClassID classIDs[], ULONG objects[])</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ObjectReferences</span><span class="params">(ObjectID objectID, ClassID classID, ULONG cObjectRefs, ObjectID objectRefIDs[])</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">RootReferences</span><span class="params">(ULONG cRootRefs, ObjectID rootRefIDs[])</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ExceptionThrown</span><span class="params">(ObjectID thrownObjectID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ExceptionSearchFunctionEnter</span><span class="params">(FunctionID functionID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ExceptionSearchFunctionLeave</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ExceptionSearchFilterEnter</span><span class="params">(FunctionID functionID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ExceptionSearchFilterLeave</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ExceptionSearchCatcherFound</span><span class="params">(FunctionID functionID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ExceptionCLRCatcherFound</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ExceptionCLRCatcherExecute</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ExceptionOSHandlerEnter</span><span class="params">(FunctionID functionID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ExceptionOSHandlerLeave</span><span class="params">(FunctionID functionID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ExceptionUnwindFunctionEnter</span><span class="params">(FunctionID functionID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ExceptionUnwindFunctionLeave</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ExceptionUnwindFinallyEnter</span><span class="params">(FunctionID functionID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ExceptionUnwindFinallyLeave</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ExceptionCatcherEnter</span><span class="params">(FunctionID functionID, ObjectID objectID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ExceptionCatcherLeave</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">COMClassicVTableCreated</span><span class="params">(ClassID wrappedClassID, REFGUID implementedIID, <span class="keyword">void</span>* pVTable, ULONG cSlots)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">COMClassicVTableDestroyed</span><span class="params">(ClassID wrappedClassID, REFGUID implementedIID, <span class="keyword">void</span>* pVTable)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ICorProfilerCallback2 interface implementation</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">ThreadNameChanged</span><span class="params">(ThreadID threadId, ULONG cchName, WCHAR name[])</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">GarbageCollectionStarted</span><span class="params">(<span class="keyword">int</span> cGenerations, BOOL generationCollected[], COR_PRF_GC_REASON reason)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">SurvivingReferences</span><span class="params">(ULONG cSurvivingObjectIDRanges, ObjectID objectIDRangeStart[], ULONG cObjectIDRangeLength[])</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">GarbageCollectionFinished</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">FinalizeableObjectQueued</span><span class="params">(DWORD finalizerFlags, ObjectID objectID)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">RootReferences2</span><span class="params">(ULONG cRootRefs, ObjectID rootRefIds[], COR_PRF_GC_ROOT_KIND rootKinds[], COR_PRF_GC_ROOT_FLAGS rootFlags[], UINT_PTR rootIds[])</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">HandleCreated</span><span class="params">(GCHandleID handleId, ObjectID initialObjectId)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> HRESULT __stdcall <span class="title">HandleDestroyed</span><span class="params">(GCHandleID handleId)</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">OBJECT_ENTRY_AUTO</span>(__uuidof(CLRProfiler), ProfilerCallback)</span><br></pre></td></tr></table></figure>
+
+<p>Visual Studio虽然会报错误找不到<code>CLSID_CLRProfiler</code>，这时只需要编译项目就会生成<code>CLRProfiler_i.c</code>和<code>CLRProfiler_i.h</code>两个文件，缺少的定义会在这两个文件中被定义。</p>
+<ul>
+<li><strong>ProfilerCallback.cpp:</strong> 创建探测器回调函数的实现代码：</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br><span class="line">352</span><br><span class="line">353</span><br><span class="line">354</span><br><span class="line">355</span><br><span class="line">356</span><br><span class="line">357</span><br><span class="line">358</span><br><span class="line">359</span><br><span class="line">360</span><br><span class="line">361</span><br><span class="line">362</span><br><span class="line">363</span><br><span class="line">364</span><br><span class="line">365</span><br><span class="line">366</span><br><span class="line">367</span><br><span class="line">368</span><br><span class="line">369</span><br><span class="line">370</span><br><span class="line">371</span><br><span class="line">372</span><br><span class="line">373</span><br><span class="line">374</span><br><span class="line">375</span><br><span class="line">376</span><br><span class="line">377</span><br><span class="line">378</span><br><span class="line">379</span><br><span class="line">380</span><br><span class="line">381</span><br><span class="line">382</span><br><span class="line">383</span><br><span class="line">384</span><br><span class="line">385</span><br><span class="line">386</span><br><span class="line">387</span><br><span class="line">388</span><br><span class="line">389</span><br><span class="line">390</span><br><span class="line">391</span><br><span class="line">392</span><br><span class="line">393</span><br><span class="line">394</span><br><span class="line">395</span><br><span class="line">396</span><br><span class="line">397</span><br><span class="line">398</span><br><span class="line">399</span><br><span class="line">400</span><br><span class="line">401</span><br><span class="line">402</span><br><span class="line">403</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;pch.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;ProfilerCallback.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line">ProfilerCallback::<span class="built_in">ProfilerCallback</span>() &#123;</span><br><span class="line">	std::cout &lt;&lt; <span class="string">&quot;ProfilerCallback::ProfilerCallback()&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT <span class="title">ProfilerCallback::FinalConstruct</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">ProfilerCallback::FinalRelease</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::Initialize</span><span class="params">(IUnknown* pICorProfilerInfoUnk)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	std::cout &lt;&lt; <span class="string">&quot;ProfilerCallback::Initialize(IUnknown* pICorProfilerInfoUnk)&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::Shutdown</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::AppDomainCreationStarted</span><span class="params">(AppDomainID appDomainID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::AppDomainCreationFinished</span><span class="params">(AppDomainID appDomainID, HRESULT hrStatus)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::AppDomainShutdownStarted</span><span class="params">(AppDomainID appDomainID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::AppDomainShutdownFinished</span><span class="params">(AppDomainID appDomainID, HRESULT hrStatus)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::AssemblyLoadStarted</span><span class="params">(AssemblyID assemblyID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::AssemblyLoadFinished</span><span class="params">(AssemblyID assemblyID, HRESULT hrStatus)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::AssemblyUnloadStarted</span><span class="params">(AssemblyID assemblyID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::AssemblyUnloadFinished</span><span class="params">(AssemblyID assemblyID, HRESULT hrStatus)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ModuleLoadStarted</span><span class="params">(ModuleID moduleID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ModuleLoadFinished</span><span class="params">(ModuleID moduleID, HRESULT hrStatus)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ModuleUnloadStarted</span><span class="params">(ModuleID moduleID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ModuleUnloadFinished</span><span class="params">(ModuleID moduleID, HRESULT hrStatus)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ModuleAttachedToAssembly</span><span class="params">(ModuleID moduleID, AssemblyID assemblyID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ClassLoadStarted</span><span class="params">(ClassID classID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ClassLoadFinished</span><span class="params">(ClassID classID, HRESULT hrStatus)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ClassUnloadStarted</span><span class="params">(ClassID classID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ClassUnloadFinished</span><span class="params">(ClassID classID, HRESULT hrStatus)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::FunctionUnloadStarted</span><span class="params">(FunctionID functionID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::JITCompilationStarted</span><span class="params">(FunctionID functionID, BOOL fIsSafeToBlock)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::JITCompilationFinished</span><span class="params">(FunctionID functionID, HRESULT hrStatus, BOOL fIsSafeToBlock)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::JITCachedFunctionSearchStarted</span><span class="params">(FunctionID functionID, BOOL* pbUseCachedFunction)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::JITCachedFunctionSearchFinished</span><span class="params">(FunctionID functionID, COR_PRF_JIT_CACHE result)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::JITFunctionPitched</span><span class="params">(FunctionID functionID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::JITInlining</span><span class="params">(FunctionID callerID, FunctionID calleeID, BOOL* pfShouldInline)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::UnmanagedToManagedTransition</span><span class="params">(FunctionID functionID, COR_PRF_TRANSITION_REASON reason)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ManagedToUnmanagedTransition</span><span class="params">(FunctionID functionID, COR_PRF_TRANSITION_REASON reason)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ThreadCreated</span><span class="params">(ThreadID threadID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ThreadDestroyed</span><span class="params">(ThreadID threadID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ThreadAssignedToOSThread</span><span class="params">(ThreadID managedThreadID, DWORD osThreadID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::RemotingClientInvocationStarted</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::RemotingClientSendingMessage</span><span class="params">(GUID* pCookie, BOOL fIsAsync)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::RemotingClientReceivingReply</span><span class="params">(GUID* pCookie, BOOL fIsAsync)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::RemotingClientInvocationFinished</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::RemotingServerReceivingMessage</span><span class="params">(GUID* pCookie, BOOL fIsAsync)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::RemotingServerInvocationStarted</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::RemotingServerInvocationReturned</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::RemotingServerSendingReply</span><span class="params">(GUID* pCookie, BOOL fIsAsync)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::RuntimeSuspendStarted</span><span class="params">(COR_PRF_SUSPEND_REASON suspendReason)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::RuntimeSuspendFinished</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::RuntimeSuspendAborted</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::RuntimeResumeStarted</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::RuntimeResumeFinished</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::RuntimeThreadSuspended</span><span class="params">(ThreadID threadID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::RuntimeThreadResumed</span><span class="params">(ThreadID threadID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::MovedReferences</span><span class="params">(ULONG cmovedObjectIDRanges, ObjectID oldObjectIDRangeStart[], ObjectID newObjectIDRangeStart[], ULONG cObjectIDRangeLength[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ObjectAllocated</span><span class="params">(ObjectID objectID, ClassID classID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ObjectsAllocatedByClass</span><span class="params">(ULONG classCount, ClassID classIDs[], ULONG objects[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ObjectReferences</span><span class="params">(ObjectID objectID, ClassID classID, ULONG objectRefs, ObjectID objectRefIDs[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::RootReferences</span><span class="params">(ULONG rootRefs, ObjectID rootRefIDs[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ExceptionThrown</span><span class="params">(ObjectID thrownObjectID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ExceptionUnwindFunctionEnter</span><span class="params">(FunctionID functionID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ExceptionUnwindFunctionLeave</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ExceptionSearchFunctionEnter</span><span class="params">(FunctionID functionID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ExceptionSearchFunctionLeave</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ExceptionSearchFilterEnter</span><span class="params">(FunctionID functionID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ExceptionSearchFilterLeave</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ExceptionSearchCatcherFound</span><span class="params">(FunctionID functionID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ExceptionCLRCatcherFound</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ExceptionCLRCatcherExecute</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ExceptionOSHandlerEnter</span><span class="params">(FunctionID functionID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ExceptionOSHandlerLeave</span><span class="params">(FunctionID functionID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ExceptionUnwindFinallyEnter</span><span class="params">(FunctionID functionID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ExceptionUnwindFinallyLeave</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ExceptionCatcherEnter</span><span class="params">(FunctionID functionID,</span></span></span><br><span class="line"><span class="params"><span class="function">	ObjectID objectID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ExceptionCatcherLeave</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::COMClassicVTableCreated</span><span class="params">(ClassID wrappedClassID, REFGUID implementedIID, <span class="keyword">void</span>* pVTable, ULONG cSlots)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::COMClassicVTableDestroyed</span><span class="params">(ClassID wrappedClassID, REFGUID implementedIID, <span class="keyword">void</span>* pVTable)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::ThreadNameChanged</span><span class="params">(ThreadID threadID, ULONG cchName, WCHAR name[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::GarbageCollectionStarted</span><span class="params">(<span class="keyword">int</span> cGenerations, BOOL generationCollected[], COR_PRF_GC_REASON reason)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::SurvivingReferences</span><span class="params">(ULONG cSurvivingObjectIDRanges, ObjectID objectIDRangeStart[], ULONG cObjectIDRangeLength[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::GarbageCollectionFinished</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::FinalizeableObjectQueued</span><span class="params">(DWORD finalizerFlags, ObjectID objectID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::RootReferences2</span><span class="params">(ULONG cRootRefs, ObjectID rootRefIDs[], COR_PRF_GC_ROOT_KIND rootKinds[], COR_PRF_GC_ROOT_FLAGS rootFlags[], UINT_PTR rootIDs[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::HandleCreated</span><span class="params">(GCHandleID handleID, ObjectID initialObjectID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT __stdcall <span class="title">ProfilerCallback::HandleDestroyed</span><span class="params">(GCHandleID handleID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> S_OK;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样简单的探测器就完成了</p>
+<h1 id="0x03-测试"><a href="#0x03-测试" class="headerlink" title="0x03 测试"></a>0x03 测试</h1><p>现在随便创建一个C#程序来进行测试</p>
+<p>想让.Net程序加载探测器，需要设置一些环境变量：</p>
+<blockquote>
+<p>SET COR_ENABLE_PROFILING=1 :: 开启探测器</p>
+<p>SET COR_PROFILER={F62D32FD-6D99-4C9F-B891-A5FCEB01B1CD} :: 探测器注册的GUID</p>
+<p>SET COR_PROFILER_PATH=CLRProfiler.dll ::探测器dll的路径</p>
+<p>SET COMPLUS_ProfAPI_ProfilerCompatibilitySetting=EnableV2Profiler :: .Net Framework 4 兼容2.0的探测器版本</p>
+</blockquote>
+<p>添加以上环境变量通过批处理启动测试程序，发现探测器被成功加载了</p>
+<p><img src="Test.png"></p>
+<p>检测进程模块列表确认</p>
+<p><img src="processhacker.png"></p>
+<p>发现第四个环境变量对于.Net Framework 4 以上版本的程序不是必须的，但缺少该环境变量导致探测器不会受到<code>Initialize</code>的通知消息</p>
+<p><img src="Test2.png"></p>
+<p>注意profiler程序的位数要与.Net程序的位数保持一致，不然就会加载探测器失败，日志记录可以在系统的Event Viewer中查看</p>
+<p><img src="EventViewer.png"></p>
+<p>Visual Studio 2019有个坑爹的地方，在以前版本编译C#程序时，如果PlatForm target选择Any CPU，下面会默认勾选上Prefer 32-bit，但是在最新下的vs2019中直接将这个checkbox给禁用了，在64位系统上就会以64位程序运行。</p>
+<p>Any CPU可以理解为在32位系统上以32位程序运行，在64位系统上以64位程序运行</p>
+<p>Any CPU(Prefer 32-bit)可以理解为在32位系统上以32位程序运行，在64位系统上会模拟作为32位程序程序运行</p>
+<h1 id="参考连接"><a href="#参考连接" class="headerlink" title="参考连接"></a>参考连接</h1><blockquote>
+<p><a target="_blank" rel="noopener" href="https://dev.to/gabbersepp/create-a-net-profiler-with-the-profiling-api-start-of-an-unexpected-journey-198n">https://dev.to/gabbersepp/create-a-net-profiler-with-the-profiling-api-start-of-an-unexpected-journey-198n</a></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>kznyx
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="http://github.io.com/CLRProfiler/" title="CLRProfiler">http://github.io.com/CLRProfiler/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/windows/" rel="tag"><i class="fa fa-tag"></i> windows</a>
+              <a href="/tags/C/" rel="tag"><i class="fa fa-tag"></i> C++</a>
+              <a href="/tags/C/" rel="tag"><i class="fa fa-tag"></i> C#</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/IpcConnection/" rel="prev" title="IPC连接">
+      <i class="fa fa-chevron-left"></i> IPC连接
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#0x01-%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">0x01 介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x02-ATL%E9%A1%B9%E7%9B%AE"><span class="nav-number">2.</span> <span class="nav-text">0x02 ATL项目</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE"><span class="nav-number">2.1.</span> <span class="nav-text">创建项目</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E4%BB%A3%E7%A0%81"><span class="nav-number">2.2.</span> <span class="nav-text">添加代码</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x03-%E6%B5%8B%E8%AF%95"><span class="nav-number">3.</span> <span class="nav-text">0x03 测试</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%BF%9E%E6%8E%A5"><span class="nav-number">4.</span> <span class="nav-text">参考连接</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="kznyx"
+      src="/images/avatar_1.jpg">
+  <p class="site-author-name" itemprop="name">kznyx</p>
+  <div class="site-description" itemprop="description">Never give up</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/kznyx" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;kznyx" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kznyx2@outlook.com" title="E-Mail → mailto:kznyx2@outlook.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">kznyx</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
