@@ -28,7 +28,7 @@
 <meta property="og:description" content="0x01 介绍通过使用Android studio提供的命令行工具，手动构建一个Android application package">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2022-06-04T08:21:11.000Z">
-<meta property="article:modified_time" content="2022-06-04T14:16:48.992Z">
+<meta property="article:modified_time" content="2022-06-05T03:37:08.749Z">
 <meta property="article:author" content="kznyx">
 <meta property="article:tag" content="Android">
 <meta name="twitter:card" content="summary">
@@ -216,10 +216,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
-              
 
-              <time title="Created: 2022-06-04 16:21:11 / Modified: 22:16:48" itemprop="dateCreated datePublished" datetime="2022-06-04T16:21:11+08:00">2022-06-04</time>
+              <time title="Created: 2022-06-04 16:21:11" itemprop="dateCreated datePublished" datetime="2022-06-04T16:21:11+08:00">2022-06-04</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2022-06-05 11:37:08" itemprop="dateModified" datetime="2022-06-05T11:37:08+08:00">2022-06-05</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -276,7 +282,7 @@ resources.arsc 资源索引表, 记录资源文件和资源ID之间的映射关�
 <li>apksigner阶段：对v1签名的改进，v2签名</li>
 </ul>
 <h2 id="0x05-构建APK"><a href="#0x05-构建APK" class="headerlink" title="0x05 构建APK"></a>0x05 构建APK</h2><h3 id="创建工程"><a href="#创建工程" class="headerlink" title="创建工程"></a>创建工程</h3><p>创建Android application目录，名称为TestApplication</p>
-<figure class="highlight bat"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> TestApplication</span><br><span class="line"><span class="built_in">cd</span> TestApplication</span><br><span class="line"><span class="built_in">mkdir</span> src\com\example\myapplication</span><br><span class="line"><span class="built_in">mkdir</span> obj</span><br><span class="line"><span class="built_in">mkdir</span> bin</span><br><span class="line"><span class="built_in">mkdir</span> res\layout</span><br><span class="line"><span class="built_in">mkdir</span> res\values</span><br><span class="line"><span class="built_in">mkdir</span> res\drawable</span><br></pre></td></tr></table></figure>
+<figure class="highlight bat"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> TestApplication</span><br><span class="line"><span class="built_in">cd</span> TestApplication</span><br><span class="line"><span class="built_in">mkdir</span> java\com\example\myapplication</span><br><span class="line"><span class="built_in">mkdir</span> obj</span><br><span class="line"><span class="built_in">mkdir</span> bin</span><br><span class="line"><span class="built_in">mkdir</span> res\layout</span><br><span class="line"><span class="built_in">mkdir</span> res\values</span><br></pre></td></tr></table></figure>
 
 <p>在src\com\example\testapplication下创建一个java源码文件，内容如下：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.myapplication;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> android.app.Activity;</span><br><span class="line"><span class="keyword">import</span> android.os.Bundle;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">Activity</span> </span>&#123;</span><br><span class="line">   <span class="meta">@Override</span></span><br><span class="line">   <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line">      setContentView(R.layout.activity_main);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -305,6 +311,16 @@ resources.arsc 资源索引表, 记录资源文件和资源ID之间的映射关�
 <p>添加dex文件进APK</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">C:\Android\SDK\build-tools\30.0.3\aapt.exe add .\test-unsigned-unaligned.apk classes.dex</span><br></pre></td></tr></table></figure>
 
+<p>上面打包APK是用aapt程序，这是旧的编译和打包资源的工具，现在使用的都是aapt2，编译链接更简单了</p>
+<p>编译资源文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">C:\Android\SDK\build-tools\30.0.3\aapt2.exe compile .\AndroidManifest.xml -o .\resc\</span><br></pre></td></tr></table></figure>
+
+<p>链接资源文件生成APK并生成R.java</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">C:\Android\SDK\build-tools\30.0.3\aapt2.exe link -o output.apk -I C:\Android\SDK\platforms\android-26\android.jar .\resc\values_strings.arsc.flat .\resc\layout_activity_main.xml.flat --manifest .\AndroidManifest.xml --java .\java\ -v</span><br></pre></td></tr></table></figure>
+
+<p>生成dex文件和前面的步骤是一样的，然后需要就dex文件添加的APK中</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">zip.exe -u output.apk classes.dex</span><br></pre></td></tr></table></figure>
+
 <p>生成签名密钥</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">keytool -genkey -v -keystore my-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias my-alias</span><br></pre></td></tr></table></figure>
 
@@ -313,6 +329,7 @@ resources.arsc 资源索引表, 记录资源文件和资源ID之间的映射关�
 
 <p>签名APK</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">C:\Android\SDK\build-tools\30.0.3\apksigner.bat sign --ks my-release-key.jks --out test-release.apk .\test-unsigned.apk</span><br></pre></td></tr></table></figure>
+<p>可以用<code>--ks-pass pass:keystore</code>指定密钥为keystore</p>
 <h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><blockquote>
 <p><a target="_blank" rel="noopener" href="https://authmane512.medium.com/how-to-build-an-apk-from-command-line-without-ide-7260e1e22676">https://authmane512.medium.com/how-to-build-an-apk-from-command-line-without-ide-7260e1e22676</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/aha_jasper/article/details/104944929">https://blog.csdn.net/aha_jasper/article/details/104944929</a></p>
 </blockquote>
